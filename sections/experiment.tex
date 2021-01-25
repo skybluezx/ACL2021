@@ -1,0 +1,78 @@
+
+\section{Experiments}
+In this section, we evaluate the Auxi-Merge Learning framework in a series of model structures for spoken language fluency assessment.
+
+\subsection{Experimental Setup}
+\textbf{Datasets.} During our survey, no public datasets with overall fluency labels and text fluency labels based on ASR text simultaneously are found in spoken language fluency assessment area.
+To evaluate the proposed framework, we collected a real-world dataset from a K-12 education platform. 
+The dataset consists of many audios and corresponding ASR text of english oral homeworks from students of grade 1 to grade 3. 
+Every student is asked to speak some sentences based on a given topic and a template. 
+In order to obtain as objective fluency labels as possible, the datasets are divided into many pieces, and part of the pieces are assigned to several annotators randomly. 
+Finally, we choose the data which is consistent among five or more annotators as our training or evaluating dataset. 
+
+Each item of the dataset consists of four parts: a overall fluency label, a text fluency label, a audio file in MP3 format, and a paragraph of ASR text generated from the audio.
+
+\textbf{Baselines.} In order to verify the universality of the proposed framework, we construct many heterogeneous models for fluency assessment as competitors. Among these baselines, ~\cite{didi} is one of them, which can be regarded as the state of the art method of multi-model fusion, and the construction of other models refers to the design of some components in ~\cite{didi}. These models can generally be divided into two types: one is based on some traditional features extraction methods, and the other one is End-to-End  structure based on some pre-train models. And in each type, models can be further classified into single-model and multi-model according to the included modality: text or/and audio. All models of baselines and their types are listed in Table~\ref{experimental-baselines}. 
+
+(1)T-Rand: The model's inputs are only ASR text generated from audios. For word representation, we use a 300-dimensional random embedding as the text embedding. And then the text embeddings are taken into a BiLSTM with 100 hidden units. Finally, the outputs of the BiLSTM are taken max-pooling and the results of binary classification are generated based on a fully-connected layer with a $200\times2$ weight matrix corresponding to the number of hidden states and the the number of classes. To train the model, we use Adam optimization with the learning rate of 0.0005.
+
+(2)A-PAA: The model is only based on audios. Refer to the model in ~\cite{didi}, we remove parts of text encoding and multi-head attention from it, just retain the audio features extraction, encoding based on BiLSTM and fully-connected layer for binary classification.
+
+(3)TA-DiDi: The model is a implementation of ~\cite{didi}.
+
+(4)T-Bert: The model is a counterpart to the T-Rand. The difference between them lies in the way of text embedding. T-Bert utilizes the Bert pre-training model to generage the text embedding instead of random embedding.
+
+(5)A-VGGish: The model is a counterpart to the A-PAA, so the structure is also similar. But for audio features generation, it does not use the methods of extracting traditional acoustic features, but directly generates feature embeddings of audio windows based on VGGish audio pre-training model.
+
+(6)TA-BV
+ based on overall fluency labels or/and text fluency labels
+
+\textbf{Metric.}
+Since the proposed framework is still in the field of auxiliary learning, that is to say, the ultimate goal of the task is only one, which is to predict whether the overall fluency.
+
+ \begin{table}
+\centering
+\begin{tabular}{ccc}
+\hline \textbf{Model} & \textbf{Pre-trainning} & \textbf{Modality} \\ \hline
+T-Rand & No & Text \\
+A-PAA & No & Audio \\
+TA-DiDi & No & Text\&Audio \\
+\hline
+T-Bert  & Yes & Text \\
+A-VGGish & Yes & Audio \\
+TA-BV & Yes & Text\&Audio \\
+\hline
+\end{tabular}
+\caption{\label{experimental-baselines} Baselines. }
+\end{table}
+
+\subsection{Results}
+Table~\ref{experimental-results} shows results of all above methods on the dataset. (1) Overall effect. (2) pretrain Detail (3) modality detail
+
+\begin{table*}
+\centering
+\begin{tabular}{cccccc}
+\hline
+\textbf{Model} & \textbf{Exp} & \textbf{AUC} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} \\
+\hline
+\multirow{2}{*}{T-Rand} & Baseline & 0.7587 & 0.828 & 0.8524 & 0.84 \\
+& Auxi-Merge & 0.7822 & 0.8357 & 0.8635 & 0.8494 \\
+\hline
+\multirow{2}{*}{A-PAA} & Baseline & 0.9025 & 0.9101 & 0.9336 & 0.9217 \\
+& Auxi-Merge & & & & \\
+\hline
+\multirow{2}{*}{TA-DiDi} & Baseline & 0.8599 & 0.9292 & 0.7749 & 0.8451 \\
+& Auxi-Merge & 0.881 & 0.924 & 0.8708 & 0.8868 \\
+\hline
+\multirow{2}{*}{T-Bert} & Baseline & 0.8231 & 0.8833 & 0.8376 & 0.8598 \\
+& Auxi-Merge & & & & \\
+\hline
+\multirow{2}{*}{A-VGGish} & Baseline & 0.9407 & 0.9384 & 0.9557 & 0.9470 \\
+& Auxi-Merge & & & & \\
+\hline
+\multirow{2}{*}{TA-BV} & Baseline & & & & \\
+& Auxi-Merge & & & & \\
+\hline
+\end{tabular}
+\caption{\label{experimental-results} Comparision of different models}
+\end{table*}
